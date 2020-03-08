@@ -1,5 +1,6 @@
 {
         "id": 1,
         "name": "mansi",
-        "password": "mansibabbar"
+        "age": 21
+        "address": "Delhi"
     }

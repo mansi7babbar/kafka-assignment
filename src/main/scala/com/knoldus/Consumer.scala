@@ -26,5 +26,5 @@ object Consumer extends App {
     }
   }
 
-  consumeMessage("kafka-assignment")
+  consumeMessage("user")
 }

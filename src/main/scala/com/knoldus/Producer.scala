@@ -18,7 +18,8 @@ object Producer extends App {
       """{
         "id": 1,
         "name": "mansi",
-        "password": "mansibabbar"
+        "age": 21
+        "address": "Delhi"
     }"""
     implicit val formats: DefaultFormats.type = DefaultFormats
     val user = parse(message).extract[User]
@@ -35,5 +36,5 @@ object Producer extends App {
     fileWrite.close()
   }
 
-  produceMessage("kafka-assignment")
+  produceMessage("user")
 }
