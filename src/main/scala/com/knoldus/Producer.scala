@@ -1,40 +1,43 @@
 package com.knoldus
 
-import java.io.{File, PrintWriter}
 import java.util.Properties
 
-import net.liftweb.json.{DefaultFormats, parse}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
-object Producer extends App {
-
-  def produceMessage(topic: String): Unit = {
-    val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
-    props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    props.put("value.serializer", classOf[CustomSerializer])
-    val producer = new KafkaProducer[String, User](props)
-    val message =
-      """{
-        "id": 1,
-        "name": "mansi",
-        "age": 21
-        "address": "Delhi"
-    }"""
-    implicit val formats: DefaultFormats.type = DefaultFormats
-    val user = parse(message).extract[User]
-    val record = new ProducerRecord[String, User](topic, "key", user)
-    writeMessage(message)
-    producer.send(record)
-    producer.close()
+object Producer {
+  def main(args: Array[String]): Unit = {
+    createProducer("user")
   }
 
-  def writeMessage(message: String): Unit = {
-    val file = new File("./src/main/resources/messages.txt")
-    val fileWrite = new PrintWriter(file)
-    fileWrite.append(message)
-    fileWrite.close()
+  def createProducer(topic: String): Unit = {
+    val properties: Properties = new Properties()
+    properties.put("bootstrap.servers", "localhost:9092")
+    properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    properties.put("value.serializer", "com.knoldus.CustomSerializer")
+    properties.put("acks", "all")
+    val producer = new KafkaProducer[String, User](properties)
+    produceMessage(producer, topic)
   }
 
-  produceMessage("user")
+  def produceMessage(producer: KafkaProducer[String, User], topic: String): Unit = {
+    val userList = new Users
+    try {
+      @scala.annotation.tailrec
+      def sendUser(users: List[User]) {
+        users match {
+          case user :: rest =>
+            producer.send(new ProducerRecord[String, User](topic, user.id.toString, user))
+            sendUser(rest)
+          case user :: Nil => producer.send(new ProducerRecord[String, User](topic, user.id.toString, user))
+          case Nil => -1
+        }
+      }
+
+      sendUser(userList.getUsers)
+    } catch {
+      case e: Exception => e.printStackTrace()
+    } finally {
+      producer.close()
+    }
+  }
 }

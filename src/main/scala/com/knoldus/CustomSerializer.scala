@@ -1,27 +1,31 @@
 package com.knoldus
 
+import java.io.{ByteArrayOutputStream, ObjectOutputStream}
 import java.util
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.common.serialization.Serializer
 
 class CustomSerializer extends Serializer[User] {
 
   override def configure(configs: util.Map[String, _], isKey: Boolean): Unit = {
+
   }
 
   override def serialize(topic: String, data: User): Array[Byte] = {
     try {
-      val mapper = new ObjectMapper()
-      val result = mapper.writeValueAsString(data).getBytes()
-      result
+      val byteOut = new ByteArrayOutputStream()
+      val objOut = new ObjectOutputStream(byteOut)
+      objOut.writeObject(data)
+      objOut.close()
+      byteOut.close()
+      byteOut.toByteArray
     }
     catch {
-      case ex: JsonProcessingException => throw new IllegalArgumentException(ex);
+      case ex: Exception => throw new Exception(ex.getMessage)
     }
   }
 
   override def close(): Unit = {
+
   }
 }

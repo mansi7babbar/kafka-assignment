@@ -1,0 +1,1 @@
+User(6,Faye Cummings,26,Minnesota)

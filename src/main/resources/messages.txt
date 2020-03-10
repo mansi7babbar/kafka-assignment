@@ -1,6 +1,0 @@
-{
-        "id": 1,
-        "name": "mansi",
-        "age": 21
-        "address": "Delhi"
-    }
